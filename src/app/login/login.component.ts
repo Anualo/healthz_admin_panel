@@ -1,10 +1,11 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject,ViewChild,ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { log } from 'util';
 import { SESSION_STORAGE, StorageService } from 'ngx-webstorage-service';
+import { UserService } from '../provider/user.service';
 
 
 
@@ -16,6 +17,7 @@ import { SESSION_STORAGE, StorageService } from 'ngx-webstorage-service';
 
 
 export class LoginComponent implements OnInit {
+  @ViewChild("user") focusField: ElementRef;
   email_id: string;
   passwords: string;
   phone_number: number;
@@ -35,24 +37,35 @@ export class LoginComponent implements OnInit {
   email: any;
   emailError = false;
   emailErrorMsg: any;
-
-
+  checkbox:any;
+show:boolean;
   password: any;
   passwordError = false;
   passwordErrorMsg: any;
-
+  public isChecked = true;
+rember: boolean;
   constructor(
     private router: Router,
+    private user:UserService,
 
     private http: HttpClient,
 
     private _api: ApiService,
-    @Inject(SESSION_STORAGE) private storage: StorageService
+    @Inject(SESSION_STORAGE) private storage: StorageService,
+    
+
+    
   ) {
 
   }
 
   ngOnInit() {
+    this.saveInLocal("login_status", false);
+   this.user.gUserLoggedIn();
+   this.checkbox=false;
+    setTimeout(()=>{
+      this.focusField.nativeElement.focus();
+      },500)
 
   }
   emailValidator() {
@@ -61,10 +74,12 @@ export class LoginComponent implements OnInit {
     if (this.email === '' || this.email === undefined || this.email === null) {
       this.emailError = true;
       this.emailErrorMsg = 'Email Address Required.'
-    } else if (!emailcheck) {
+    } 
+    else if (!emailcheck) {
       this.emailError = true;
       this.emailErrorMsg = 'Enter Valid Email Address.'
-    } else {
+    } 
+    else {
       this.emailError = false;
     }
   }
@@ -78,15 +93,24 @@ export class LoginComponent implements OnInit {
   }
 
   emailChange(data) {
+  
     //console.log(data);
     this.email = data;
-    this.emailValidator();
+    // this.emailValidator();
+    this.emailError = false;
+  }
+  focusUser(){
+    this.emailError = false;
   }
 
   passwordChange(data) {
     //console.log(data);
     this.password = data;
     this.passwordValidator();
+  
+  }
+  focusPassword(){
+    this.emailValidator();
   }
 
   validator() {
@@ -98,13 +122,22 @@ export class LoginComponent implements OnInit {
       this.validation = false;
     }
   }
-
+  remChange(data){
+    console.log(data)
+    this.checkbox=data
+  }
   logintest1() {
     this.validator();
     if (this.validation) {
-      if ((this.email == 'healthz@gmail.com') && (this.password == '12345')) {
+      console.log(this.rember);
+      if ((this.email == 'healthz@gmail.com') && (this.password == '12345') && (this.checkbox == true)) {
+       
+        localStorage.setItem("this.email", this.email)
+  this.saveInLocal("login_status", true);
         this.router.navigateByUrl('/admin/dashboard');
-      } else {
+      
+     
+    }else {
         alert('Invalid Account');
       }
     }
@@ -117,5 +150,9 @@ export class LoginComponent implements OnInit {
   getFromLocal(key): any {
     return this.storage.get(key);
   }
+  toogle(){
+    this.show=!this.show;
+  }
+  
 }
 
