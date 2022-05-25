@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { log } from 'util';
 import { SESSION_STORAGE, StorageService } from 'ngx-webstorage-service';
+import { UserService } from '../provider/user.service';
 
 
 
@@ -36,25 +37,32 @@ export class LoginComponent implements OnInit {
   email: any;
   emailError = false;
   emailErrorMsg: any;
-
+  checkbox:any;
 show:boolean;
   password: any;
   passwordError = false;
   passwordErrorMsg: any;
-
+  public isChecked = true;
+rember: boolean;
   constructor(
     private router: Router,
+    private user:UserService,
 
     private http: HttpClient,
 
     private _api: ApiService,
-    @Inject(SESSION_STORAGE) private storage: StorageService
+    @Inject(SESSION_STORAGE) private storage: StorageService,
+    
+
+    
   ) {
 
   }
 
   ngOnInit() {
-
+    this.saveInLocal("login_status", false);
+   this.user.gUserLoggedIn();
+   this.checkbox=false;
     setTimeout(()=>{
       this.focusField.nativeElement.focus();
       },500)
@@ -89,6 +97,10 @@ show:boolean;
     //console.log(data);
     this.email = data;
     // this.emailValidator();
+    this.emailError = false;
+  }
+  focusUser(){
+    this.emailError = false;
   }
 
   passwordChange(data) {
@@ -110,13 +122,22 @@ show:boolean;
       this.validation = false;
     }
   }
-
+  remChange(data){
+    console.log(data)
+    this.checkbox=data
+  }
   logintest1() {
     this.validator();
     if (this.validation) {
-      if ((this.email == 'healthz@gmail.com') && (this.password == '12345')) {
+      console.log(this.rember);
+      if ((this.email == 'healthz@gmail.com') && (this.password == '12345') && (this.checkbox == true)) {
+       
+        localStorage.setItem("this.email", this.email)
+  this.saveInLocal("login_status", true);
         this.router.navigateByUrl('/admin/dashboard');
-      } else {
+      
+     
+    }else {
         alert('Invalid Account');
       }
     }
@@ -132,5 +153,6 @@ show:boolean;
   toogle(){
     this.show=!this.show;
   }
+  
 }
 
